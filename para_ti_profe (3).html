@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Para ti, profe 💛</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital@0;1&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 100%; height: 100%;
+    background-color: #000000;
+  }
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    overflow: hidden;
+    font-family: 'Playfair Display', serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .stars {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .star {
+    position: absolute;
+    border-radius: 50%;
+    background: #fde68a;
+    animation: twinkle var(--d) var(--delay) ease-in-out infinite;
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0; transform: scale(0.5); }
+    50% { opacity: 0.6; transform: scale(1); }
+  }
+  .container {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    padding: 1rem;
+  }
+  canvas {
+    display: block;
+    max-width: 100%;
+    background: #000000;
+    border-radius: 8px;
+  }
+  .message {
+    text-align: center;
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 1.5s ease, transform 1.5s ease;
+    padding: 0 1rem;
+    margin-top: 1.2rem;
+  }
+  .message.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .main-text {
+    font-size: clamp(22px, 6vw, 36px);
+    font-style: italic;
+    letter-spacing: 0.05em;
+    background: linear-gradient(90deg, #fbbf24, #fde68a, #f59e0b, #fde68a, #fbbf24);
+    background-size: 300% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shimmer 4s linear infinite;
+  }
+  .sub-text {
+    font-size: clamp(12px, 3vw, 16px);
+    color: #9b4d7a;
+    letter-spacing: 0.15em;
+    margin-top: 10px;
+    font-style: normal;
+  }
+  .tiny-text {
+    font-size: clamp(9px, 2vw, 11px);
+    color: #6b2d50;
+    letter-spacing: 0.12em;
+    margin-top: 7px;
+    font-style: normal;
+  }
+  @keyframes shimmer {
+    to { background-position: 300% center; }
+  }
+  .heart-beat {
+    animation: heartbeat 2.5s ease-in-out infinite;
+  }
+  @keyframes heartbeat {
+    0%, 100% { transform: scale(1); }
+    30% { transform: scale(1.04); }
+    60% { transform: scale(0.98); }
+  }
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+
+<div class="container">
+  <div class="heart-beat">
+    <canvas id="c"></canvas>
+  </div>
+  <div class="message" id="msg">
+    <p class="main-text">Para ti, profe 🎓🌸</p>
+    <p class="sub-text">que te vaya bien en tu viaje, me cuentas cómo te va 🌟</p>
+
+  </div>
+</div>
+
+<script>
+  // Stars
+  const starsEl = document.getElementById('stars');
+  for (let i = 0; i < 50; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random() * 2.5 + 1;
+    s.style.cssText = 'width:'+size+'px;height:'+size+'px;top:'+(Math.random()*100)+'%;left:'+(Math.random()*100)+'%;--d:'+(1.5+Math.random()*3)+'s;--delay:'+(Math.random()*3)+'s;';
+    starsEl.appendChild(s);
+  }
+
+  const canvas = document.getElementById('c');
+  const ctx = canvas.getContext('2d');
+
+  function resize() {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const size = Math.min(vw * 0.92, vh * 0.6, 500);
+    canvas.width = Math.floor(size);
+    canvas.height = Math.floor(size * 0.72);
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    buildPoints();
+  }
+
+  let W, H, hcx, hcy, fcx, fcy;
+  const TOTAL = 700;
+  let heartPts = [], flowerPts = [];
+
+  function buildPoints() {
+    W = canvas.width; H = canvas.height;
+    hcx = W * 0.35; hcy = H * 0.5;
+    fcx = W * 0.72; fcy = H * 0.5;
+    const hs = W * 0.21;
+    const fs = W * 0.13;
+    heartPts = [];
+    flowerPts = [];
+    for (let i = 0; i <= TOTAL; i++) {
+      const t = (i / TOTAL) * Math.PI * 2;
+      heartPts.push({
+        x: hcx + hs * 16 * Math.pow(Math.sin(t), 3) / 16,
+        y: hcy - hs * (13*Math.cos(t) - 5*Math.cos(2*t) - 2*Math.cos(3*t) - Math.cos(4*t)) / 16
+      });
+      const r = fs * Math.abs(Math.cos(3 * t));
+      flowerPts.push({ x: fcx + r * Math.cos(t), y: fcy + r * Math.sin(t) });
+    }
+  }
+
+  resize();
+  window.addEventListener('resize', resize);
+
+  function makeParticles(points, hueBase, count, trailBase) {
+    return Array.from({ length: count }, (_, i) => ({
+      t: (i / count) * TOTAL,
+      speed: 1.1 + Math.random() * 0.9,
+      trail: [],
+      trailLen: trailBase + Math.floor(Math.random() * 35),
+      hue: hueBase + Math.random() * 25,
+      points,
+    }));
+  }
+
+  let heartP = makeParticles(heartPts, 42, 8, 85);
+  let flowerP = makeParticles(flowerPts, 300, 6, 70);
+
+  function drawGroup(list) {
+    list.forEach(function(p) {
+      p.t = (p.t + p.speed) % TOTAL;
+      const pos = p.points[Math.floor(p.t)];
+      p.trail.push({ x: pos.x, y: pos.y });
+      if (p.trail.length > p.trailLen) p.trail.shift();
+
+      for (let i = 1; i < p.trail.length; i++) {
+        const a = i / p.trail.length;
+        ctx.beginPath();
+        ctx.moveTo(p.trail[i-1].x, p.trail[i-1].y);
+        ctx.lineTo(p.trail[i].x, p.trail[i].y);
+        ctx.strokeStyle = 'hsla('+p.hue+',100%,65%,'+(a*0.95)+')';
+        ctx.lineWidth = a * 2.5;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+        if (a > 0.78) {
+          ctx.beginPath();
+          ctx.moveTo(p.trail[i-1].x, p.trail[i-1].y);
+          ctx.lineTo(p.trail[i].x, p.trail[i].y);
+          ctx.strokeStyle = 'hsla('+p.hue+',100%,90%,'+(a*0.28)+')';
+          ctx.lineWidth = a * 9;
+          ctx.stroke();
+        }
+      }
+
+      const head = p.trail[p.trail.length - 1];
+      if (head) {
+        const g = ctx.createRadialGradient(head.x, head.y, 0, head.x, head.y, 10);
+        g.addColorStop(0, 'hsla('+p.hue+',100%,97%,0.95)');
+        g.addColorStop(1, 'hsla('+p.hue+',100%,65%,0)');
+        ctx.beginPath();
+        ctx.arc(head.x, head.y, 10, 0, Math.PI * 2);
+        ctx.fillStyle = g;
+        ctx.fill();
+      }
+    });
+  }
+
+  let frame = 0, msgShown = false;
+
+  function draw() {
+    ctx.fillStyle = 'rgba(0,0,0,0.17)';
+    ctx.fillRect(0, 0, W, H);
+    drawGroup(heartP);
+    drawGroup(flowerP);
+    frame++;
+    if (frame === 180 && !msgShown) {
+      document.getElementById('msg').classList.add('visible');
+      msgShown = true;
+    }
+    requestAnimationFrame(draw);
+  }
+
+  draw();
+</script>
+</body>
+</html>
